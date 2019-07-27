@@ -1,0 +1,6 @@
+{
+  "dest": "out/",
+  "icon": "icon.png",
+  "categories": ["Utility"],
+  "lintianOverrides": ["changelog-file-missing-in-native-package"]
+}

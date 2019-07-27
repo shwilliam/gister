@@ -1,0 +1,59 @@
+{
+  "name": "rabbit",
+  "productName": "rabbit",
+  "version": "0.1.0",
+  "description": "munch",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "package:deb": "electron-forge package && electron-installer-debian --src out/rabbit-linux-x64/ --arch amd64 --config debian.json",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\""
+  },
+  "keywords": [],
+  "author": {
+    "name": "William L",
+    "email": "w-lindvall@outlook.com"
+  },
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "rabbit"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "6.0.0-beta.43",
+    "@electron-forge/maker-deb": "6.0.0-beta.43",
+    "@electron-forge/maker-rpm": "6.0.0-beta.43",
+    "@electron-forge/maker-squirrel": "6.0.0-beta.43",
+    "@electron-forge/maker-zip": "6.0.0-beta.43",
+    "electron": "5.0.8"
+  }
+}
