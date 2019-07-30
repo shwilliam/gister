@@ -11,13 +11,21 @@ class Model {
 
   bindHandler(controller) {
     this.onGistsListChange = controller.onGistsListChange
+    this.onGistSelect = controller.onGistSelect
   }
 
   fetchGists() {
-    this.octokit.gists.list().then(({data}) => {
-      this.gists = data
-      this.onGistsListChange(this.gists)
-    })
+    this.octokit.gists
+      .list()
+      .then(({data}) => this.onGistsListChange(data))
+  }
+
+  fetchGist(id) {
+    this.octokit.gists
+      .get({
+        gist_id: id,
+      })
+      .then(({data}) => this.onGistSelect(data))
   }
 
   createGist(payload) {
@@ -47,6 +55,11 @@ class View {
     this.submitButton = this.createElement('button')
     this.submitButton.type = 'submit'
     this.submitButton.textContent = 'Create'
+
+    this.editor = this.createElement('pre')
+    this.editorCode = this.createElement('code')
+    this.editorCode.contentEditable = true
+    this.editor.append(this.editorCode)
 
     this.form.append(
       this.inputDesc,
@@ -86,25 +99,31 @@ class View {
 
     gists.forEach(gist => {
       const li = this.createElement('li')
-      const ul = this.createElement('ul')
+      const btn = this.createElement('button')
 
-      Object.values(gist.files).forEach(file => {
-        const li = this.createElement('li')
-        const a = this.createElement('a')
-        a.href = file.raw_url
-        a.textContent = file.filename
+      btn.dataset.id = gist.id
+      btn.textContent = gist.description
 
-        li.append(a)
-        ul.append(li)
-      })
-
-      li.append(gist.description, ul)
+      li.append(btn)
       this.gistsList.append(li)
     })
   }
 
+  displayEditor(gist) {
+    // TODO: handle multiple files
+    const {description} = gist
+    const {filename, content} = Object.values(gist.files)[0]
+
+    this.editorCode.textContent = content
+    this.app.append(this.editor)
+  }
+
   setUpEventListeners(controller) {
     this.form.addEventListener('submit', controller.handleNewGist)
+    this.gistsList.addEventListener(
+      'click',
+      controller.handleSelectGist,
+    )
   }
 }
 
@@ -121,9 +140,18 @@ class Controller {
     this.view.displayGists(gists)
   }
 
+  onGistSelect = gist => {
+    this.view.displayEditor(gist)
+  }
+
+  handleSelectGist = event => {
+    if (event.target.tagName === 'BUTTON') {
+      this.model.fetchGist(event.target.dataset.id)
+    }
+  }
+
   handleNewGist = event => {
     event.preventDefault()
-    console.log(event)
     const {inputDesc, inputFilename} = this.view
 
     if (
