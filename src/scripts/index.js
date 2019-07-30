@@ -2,18 +2,26 @@
 
 class Model {
   constructor() {
-    const octokit = Octokit({
+    this.octokit = Octokit({
       auth: '',
     })
 
-    octokit.gists.list().then(({data}) => {
+    this.fetchGists()
+  }
+
+  bindHandler(controller) {
+    this.onGistsListChange = controller.onGistsListChange
+  }
+
+  fetchGists() {
+    this.octokit.gists.list().then(({data}) => {
       this.gists = data
       this.onGistsListChange(this.gists)
     })
   }
 
-  bindHandler(controller) {
-    this.onGistsListChange = controller.onGistsListChange
+  createGist(payload) {
+    this.octokit.gists.create(payload)
   }
 }
 
@@ -21,7 +29,32 @@ class View {
   constructor() {
     this.app = this.getElement('#root')
     this.gistsList = this.createElement('ul')
-    this.app.append(this.gistsList)
+
+    this.form = this.createElement('form')
+
+    this.inputDesc = this.createElement('input')
+    this.inputDesc.type = 'text'
+    this.inputDesc.placeholder = 'Gist description'
+    this.inputDesc.name = 'description'
+    this.inputDesc.required = true
+
+    this.inputFilename = this.createElement('input')
+    this.inputFilename.type = 'text'
+    this.inputFilename.placeholder = 'Filename'
+    this.inputFilename.name = 'filename'
+    this.inputFilename.required = true
+
+    this.submitButton = this.createElement('button')
+    this.submitButton.type = 'submit'
+    this.submitButton.textContent = 'Create'
+
+    this.form.append(
+      this.inputDesc,
+      this.inputFilename,
+      this.submitButton,
+    )
+
+    this.app.append(this.form, this.gistsList)
   }
 
   createElement(tag, className) {
@@ -36,6 +69,11 @@ class View {
     const element = document.querySelector(selector)
 
     return element
+  }
+
+  resetForm() {
+    this.inputDesc.value = ''
+    this.inputFilename.value = ''
   }
 
   displayGists(gists) {
@@ -64,6 +102,10 @@ class View {
       this.gistsList.append(li)
     })
   }
+
+  setUpEventListeners(controller) {
+    this.form.addEventListener('submit', controller.handleNewGist)
+  }
 }
 
 class Controller {
@@ -72,10 +114,34 @@ class Controller {
     this.view = new View()
 
     this.model.bindHandler(this)
+    this.view.setUpEventListeners(this)
   }
 
   onGistsListChange = gists => {
     this.view.displayGists(gists)
+  }
+
+  handleNewGist = event => {
+    event.preventDefault()
+    console.log(event)
+    const {inputDesc, inputFilename} = this.view
+
+    if (
+      inputDesc.value.trim().length &&
+      inputFilename.value.trim().length
+    ) {
+      this.model.createGist({
+        description: inputFilename.value,
+        public: true,
+        files: {
+          [inputFilename.value]: {
+            content: 'Hello world!',
+          },
+        },
+      })
+
+      this.view.resetForm()
+    }
   }
 }
 
