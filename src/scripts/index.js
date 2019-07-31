@@ -19,7 +19,7 @@ class Model {
     this.octokit.gists
       .list({
         headers: {
-          'If-None-Match': '',
+          'If-None-Match': '', // avoid cache
         },
       })
       .then(({data}) => this.onGistsListChange(data))
@@ -30,7 +30,7 @@ class Model {
       .get({
         gist_id: id,
         headers: {
-          'If-None-Match': '',
+          'If-None-Match': '', // avoid cache
         },
       })
       .then(({data}) => {
@@ -40,8 +40,7 @@ class Model {
   }
 
   createGist(payload) {
-    this.octokit.gists.create(payload)
-    // update gists list
+    this.octokit.gists.create(payload).then(() => this.fetchGists())
   }
 
   saveGist(payload) {
@@ -191,7 +190,6 @@ class Controller {
       inputDesc.value.trim().length &&
       inputFilename.value.trim().length
     ) {
-      // TODO: move to model
       this.model.createGist({
         description: inputDesc.value,
         public: true,

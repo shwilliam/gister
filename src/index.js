@@ -2,7 +2,6 @@ const {app, BrowserWindow} = require('electron')
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
-  // eslint-disable-line global-require
   app.quit()
 }
 
@@ -17,13 +16,11 @@ const createWindow = () => {
     height: 600,
   })
 
-  // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`)
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // open dev tools
+  // mainWindow.webContents.openDevTools()
 
-  // Emitted when the window is closed.
   mainWindow.on('closed', () => {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
