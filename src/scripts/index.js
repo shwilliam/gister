@@ -5,6 +5,7 @@ class Model {
     this.octokit = Octokit({
       auth: '',
     })
+    this.activeGist = null
 
     this.fetchGists()
   }
@@ -16,7 +17,11 @@ class Model {
 
   fetchGists() {
     this.octokit.gists
-      .list()
+      .list({
+        headers: {
+          'If-None-Match': '',
+        },
+      })
       .then(({data}) => this.onGistsListChange(data))
   }
 
@@ -24,12 +29,23 @@ class Model {
     this.octokit.gists
       .get({
         gist_id: id,
+        headers: {
+          'If-None-Match': '',
+        },
       })
-      .then(({data}) => this.onGistSelect(data))
+      .then(({data}) => {
+        this.activeGist = data
+        this.onGistSelect(data)
+      })
   }
 
   createGist(payload) {
     this.octokit.gists.create(payload)
+    // update gists list
+  }
+
+  saveGist(payload) {
+    this.octokit.gists.update(payload)
   }
 }
 
@@ -38,28 +54,32 @@ class View {
     this.app = this.getElement('#root')
     this.gistsList = this.createElement('ul')
 
+    // new gist form
     this.form = this.createElement('form')
-
     this.inputDesc = this.createElement('input')
     this.inputDesc.type = 'text'
     this.inputDesc.placeholder = 'Gist description'
     this.inputDesc.name = 'description'
     this.inputDesc.required = true
-
     this.inputFilename = this.createElement('input')
     this.inputFilename.type = 'text'
     this.inputFilename.placeholder = 'Filename'
     this.inputFilename.name = 'filename'
     this.inputFilename.required = true
-
     this.submitButton = this.createElement('button')
     this.submitButton.type = 'submit'
     this.submitButton.textContent = 'Create'
 
+    // editor
     this.editor = this.createElement('pre')
+    this.editor.classList.add('editor')
     this.editorCode = this.createElement('code')
     this.editorCode.contentEditable = true
-    this.editor.append(this.editorCode)
+    this.editorTitle = this.createElement('h2')
+    this.editor.append(this.editorTitle, this.editorCode)
+    this.saveButton = this.createElement('button')
+    this.saveButton.textContent = 'Save'
+    this.saveButton.classList.add('editor__btn')
 
     this.form.append(
       this.inputDesc,
@@ -109,13 +129,26 @@ class View {
     })
   }
 
-  displayEditor(gist) {
+  displayEditor(controller, gist) {
     // TODO: handle multiple files
     const {description} = gist
     const {filename, content} = Object.values(gist.files)[0]
+    this.saveButton.addEventListener(
+      'click',
+      controller.handleSaveGist,
+    )
 
     this.editorCode.textContent = content
-    this.app.append(this.editor)
+    this.editorTitle.textContent = filename
+    this.app.append(this.editor, this.saveButton)
+  }
+
+  closeEditor(controller) {
+    this.app.removeChild(this.editor)
+    this.saveButton.removeEventListener(
+      'click',
+      controller.handleSaveGist,
+    )
   }
 
   setUpEventListeners(controller) {
@@ -141,7 +174,7 @@ class Controller {
   }
 
   onGistSelect = gist => {
-    this.view.displayEditor(gist)
+    this.view.displayEditor(this, gist)
   }
 
   handleSelectGist = event => {
@@ -158,8 +191,9 @@ class Controller {
       inputDesc.value.trim().length &&
       inputFilename.value.trim().length
     ) {
+      // TODO: move to model
       this.model.createGist({
-        description: inputFilename.value,
+        description: inputDesc.value,
         public: true,
         files: {
           [inputFilename.value]: {
@@ -170,6 +204,18 @@ class Controller {
 
       this.view.resetForm()
     }
+  }
+
+  handleSaveGist = () => {
+    this.model.saveGist({
+      gist_id: this.model.activeGist.id,
+      files: {
+        [this.view.editorTitle.innerText]: {
+          content: this.view.editorCode.innerText,
+        },
+      },
+    })
+    this.view.closeEditor(this)
   }
 }
 

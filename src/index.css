@@ -7,14 +7,20 @@ body {
 }
 
 /* editor */
-pre {
-  border: 1px solid black;
-  overflow: scroll;
+.editor {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  border: 1px solid black;
+  overflow: scroll;
   background-color: white;
   padding: 2rem;
+}
+
+.editor__btn {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
