@@ -52,7 +52,6 @@ class View {
   constructor() {
     this.app = this.getElement('#root')
     this.gistsList = this.createElement('ul')
-
     // new gist form
     this.form = this.createElement('form')
     this.inputDesc = this.createElement('input')
@@ -60,6 +59,8 @@ class View {
     this.inputDesc.placeholder = 'Gist description'
     this.inputDesc.name = 'description'
     this.inputDesc.required = true
+    this.inputFlexWrap = this.createElement('div')
+    this.inputFlexWrap.classList.add('flex')
     this.inputFilename = this.createElement('input')
     this.inputFilename.type = 'text'
     this.inputFilename.placeholder = 'Filename'
@@ -68,6 +69,8 @@ class View {
     this.submitButton = this.createElement('button')
     this.submitButton.type = 'submit'
     this.submitButton.textContent = 'Create'
+    this.submitButton.classList.add('btn', 'btn--primary')
+    this.inputFlexWrap.append(this.inputFilename, this.submitButton)
 
     // editor
     this.editor = this.createElement('pre')
@@ -76,16 +79,17 @@ class View {
     this.editorCode.contentEditable = true
     this.editorTitle = this.createElement('h2')
     this.editor.append(this.editorTitle, this.editorCode)
+    this.editorActions = this.createElement('div')
+    this.editorActions.classList.add('editor__actions')
     this.saveButton = this.createElement('button')
     this.saveButton.textContent = 'Save'
-    this.saveButton.classList.add('editor__btn')
+    this.saveButton.classList.add('btn', 'btn--primary')
+    this.closeButton = this.createElement('button')
+    this.closeButton.textContent = 'Cancel'
+    this.closeButton.classList.add('btn')
+    this.editorActions.append(this.closeButton, this.saveButton)
 
-    this.form.append(
-      this.inputDesc,
-      this.inputFilename,
-      this.submitButton,
-    )
-
+    this.form.append(this.inputDesc, this.inputFlexWrap)
     this.app.append(this.form, this.gistsList)
   }
 
@@ -122,6 +126,7 @@ class View {
 
       btn.dataset.id = gist.id
       btn.textContent = gist.description
+      btn.classList.add('btn', 'btn--reset')
 
       li.append(btn)
       this.gistsList.append(li)
@@ -139,15 +144,19 @@ class View {
 
     this.editorCode.textContent = content
     this.editorTitle.textContent = filename
-    this.app.append(this.editor, this.saveButton)
+    this.form.remove()
+    this.gistsList.remove()
+    this.app.append(this.editor, this.editorActions)
   }
 
   closeEditor(controller) {
-    this.app.removeChild(this.editor)
+    this.editor.remove()
+    this.editorActions.remove()
     this.saveButton.removeEventListener(
       'click',
       controller.handleSaveGist,
     )
+    this.app.append(this.form, this.gistsList)
   }
 
   setUpEventListeners(controller) {
@@ -155,6 +164,9 @@ class View {
     this.gistsList.addEventListener(
       'click',
       controller.handleSelectGist,
+    )
+    this.closeButton.addEventListener('click', () =>
+      this.closeEditor(controller),
     )
   }
 }
