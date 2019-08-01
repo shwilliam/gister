@@ -2,17 +2,21 @@
   "name": "rabbit",
   "productName": "rabbit",
   "version": "0.1.0",
-  "description": "munch",
+  "description": "Vanilla JS MVC Electron app for working with Gists",
   "main": "src/index.js",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
     "package:deb": "electron-forge package && electron-installer-debian --src out/rabbit-linux-x64/ --arch amd64 --config debian.json",
     "make": "electron-forge make",
-    "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
+    "publish": "electron-forge publish"
   },
-  "keywords": [],
+  "keywords": [
+    "electron",
+    "gist",
+    "github",
+    "rest"
+  ],
   "author": {
     "name": "William L",
     "email": "w-lindvall@outlook.com"
