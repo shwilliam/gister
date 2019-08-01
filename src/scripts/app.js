@@ -2,15 +2,20 @@
 
 class Model {
   constructor() {
-    this.octokit = Octokit({
-      auth: '',
-    })
+    this.octokit = null
     this.activeGist = null
+  }
 
-    this.fetchGists()
+  initOctokit(key) {
+    this.octokit = Octokit({
+      auth: key,
+    })
+
+    this.onOctokitInit()
   }
 
   bindHandler(controller) {
+    this.onOctokitInit = controller.onOctokitInit
     this.onGistsListChange = controller.onGistsListChange
     this.onGistSelect = controller.onGistSelect
   }
@@ -51,8 +56,21 @@ class Model {
 class View {
   constructor() {
     this.app = this.getElement('#root')
+
+    this.keyPrompt = this.createElement('form')
+    this.keyPrompt.classList.add('flex')
+    this.keyPromptInput = this.createElement('input')
+    this.keyPromptInput.type = 'text'
+    this.keyPromptInput.placeholder = 'GitHub personal access token'
+    this.keyPromptInput.required = true
+    this.keyPromptSubmit = this.createElement('button')
+    this.keyPromptSubmit.type = 'submit'
+    this.keyPromptSubmit.textContent = 'Submit'
+    this.keyPromptSubmit.classList.add('btn', 'btn--primary')
+    this.keyPrompt.append(this.keyPromptInput, this.keyPromptSubmit)
+
     this.gistsList = this.createElement('ul')
-    // new gist form
+
     this.form = this.createElement('form')
     this.inputDesc = this.createElement('input')
     this.inputDesc.type = 'text'
@@ -71,8 +89,8 @@ class View {
     this.submitButton.textContent = 'Create'
     this.submitButton.classList.add('btn', 'btn--primary')
     this.inputFlexWrap.append(this.inputFilename, this.submitButton)
+    this.form.append(this.inputDesc, this.inputFlexWrap)
 
-    // editor
     this.editor = this.createElement('pre')
     this.editor.classList.add('editor')
     this.editorCode = this.createElement('code')
@@ -89,8 +107,7 @@ class View {
     this.closeButton.classList.add('btn')
     this.editorActions.append(this.closeButton, this.saveButton)
 
-    this.form.append(this.inputDesc, this.inputFlexWrap)
-    this.app.append(this.form, this.gistsList)
+    this.app.append(this.keyPrompt)
   }
 
   createElement(tag, className) {
@@ -105,6 +122,14 @@ class View {
     const element = document.querySelector(selector)
 
     return element
+  }
+
+  hideKeyPrompt() {
+    this.keyPrompt.remove()
+  }
+
+  displayGistsList() {
+    this.app.append(this.form, this.gistsList)
   }
 
   resetForm() {
@@ -168,6 +193,9 @@ class View {
     this.closeButton.addEventListener('click', () =>
       this.closeEditor(controller),
     )
+    this.keyPrompt.addEventListener('submit', e => {
+      controller.handleInitOctokit(this.keyPromptInput.value)
+    })
   }
 }
 
@@ -180,12 +208,22 @@ class Controller {
     this.view.setUpEventListeners(this)
   }
 
+  onOctokitInit = () => {
+    this.view.hideKeyPrompt()
+    this.view.displayGistsList()
+    this.model.fetchGists()
+  }
+
   onGistsListChange = gists => {
     this.view.displayGists(gists)
   }
 
   onGistSelect = gist => {
     this.view.displayEditor(this, gist)
+  }
+
+  handleInitOctokit = key => {
+    this.model.initOctokit(key)
   }
 
   handleSelectGist = event => {
