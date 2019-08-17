@@ -1,13 +1,13 @@
 {
-  "name": "rabbit",
-  "productName": "rabbit",
+  "name": "gister",
+  "productName": "gister",
   "version": "0.1.0",
   "description": "Vanilla JS MVC Electron app for working with Gists",
   "main": "src/index.js",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "package:deb": "electron-forge package && electron-installer-debian --src out/rabbit-linux-x64/ --arch amd64 --config debian.json",
+    "package:deb": "electron-forge package && electron-installer-debian --src out/gister-linux-x64/ --arch amd64 --config debian.json",
     "make": "electron-forge make",
     "publish": "electron-forge publish"
   },
@@ -29,7 +29,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "rabbit"
+            "name": "gister"
           }
         },
         {
