@@ -13,22 +13,19 @@ body {
   max-width: 38rem;
 }
 
-li {
-  list-style-type: square;
+ul,
+ol {
+  padding: 0;
+  margin: 0;
 }
 
-button {
-  font: inherit;
-  padding: 6px 8px;
-  background-color: #e6ebf1;
-  border: 1px solid rgba(27, 31, 35, 0.2);
-  border-radius: 3px;
-  cursor: pointer;
+li {
+  list-style-type: none;
 }
 
 input {
   font: inherit;
-  padding: 6px 8px;
+  padding: 3px 8px;
   background-color: #fff;
   width: 100%;
   border: 1px solid #d1d5da;
@@ -44,11 +41,28 @@ input:focus {
   outline: none;
 }
 
+/* utils */
+
 .flex {
   display: flex;
 }
 
+.sr-only {
+  position: absolute;
+  clip: rect(1px, 1px, 1px, 1px);
+  left: -9999px;
+}
+
 /* text button */
+.btn {
+  font: inherit;
+  padding: 3px 8px;
+  background-color: #e6ebf1;
+  border: 1px solid rgba(27, 31, 35, 0.2);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
 .btn--reset {
   font: inherit;
   background-color: transparent;
@@ -62,27 +76,12 @@ input:focus {
   color: #fff;
 }
 
-/* editor */
-.editor {
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  margin: 2rem;
-  padding: 1rem;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 3rem; /* editor actions */
-  overflow: scroll;
-  background-color: white;
+.btn--disabled {
+  cursor: not-allowed !important;
 }
 
-.editor__actions {
-  position: absolute;
-  bottom: 2rem;
-  right: 2rem;
-}
-
-.editor__actions button + button {
-  margin-left: 10px;
+/* file input */
+.file-input__label {
+  padding: 0 0.5rem;
+  cursor: pointer;
 }

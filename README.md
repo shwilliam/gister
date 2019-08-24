@@ -1,15 +1,19 @@
 # Gister
 
-> Vanilla JS MVC Electron app for working with Gists
+> Vanilla JS MVC Electron app for syncing Gists
+
+## Usage
+
+1. Install dependencies & package the desktop app (`npm i && npm run package`)
+2. Generate a personal access token with `gist` access [here](https://github.com/settings/tokens)
+3. Open the app in `out/`, enter access token & start working with your gists!
+
+To package the app for installation on Debian-based Linux distros, install the npm package `electron-installer-debian`, run the npm script `build:deb` and simply double-click the built `.deb` file in `out/`.
 
 ## Development
 
-1. Install dependencies (e.g. `yarn`)
-2. Open dev build (e.g. `yarn start`)
-
-## Installation
-
-To package the app for installation on Debian-based Linux distros, install the npm package `electron-installer-debian`, run the npm script `build:deb` and simply double-click the built `.deb` file in `out/`.
+1. Install dependencies (`npm i`)
+2. Open dev build (`npm start`)
 
 ## Contributing
 
