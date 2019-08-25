@@ -39,7 +39,9 @@ class Model {
   }
 
   createGist(payload) {
-    this.octokit.gists.create(payload).then(() => this.fetchGists())
+    return this.octokit.gists
+      .create(payload)
+      .then(() => this.fetchGists())
   }
 
   saveGist(payload) {
@@ -63,9 +65,17 @@ class View {
     this.keyPromptSubmit.classList.add('btn', 'btn--primary')
     this.keyPrompt.append(this.keyPromptInput, this.keyPromptSubmit)
 
-    this.gistsList = document.createElement('ul')
+    this.gistFormToggle = document.createElement('button')
+    this.gistFormToggle.textContent = '➕'
+    this.gistFormToggle.classList.add(
+      'btn',
+      'btn--reset',
+      'gist-form__toggle',
+    )
 
-    this.form = document.createElement('form')
+    this.gistForm = document.createElement('form')
+    this.gistForm.classList.add('gist-form')
+    this.gistForm.hidden = true
     this.inputDesc = document.createElement('input')
     this.inputDesc.type = 'text'
     this.inputDesc.placeholder = 'Gist description'
@@ -83,9 +93,11 @@ class View {
     this.submitButton.textContent = 'Create'
     this.submitButton.classList.add('btn', 'btn--primary')
     this.inputFlexWrap.append(this.inputFilename, this.submitButton)
-    this.form.append(this.inputDesc, this.inputFlexWrap)
+    this.gistForm.append(this.inputDesc, this.inputFlexWrap)
 
-    this.app.append(this.keyPrompt)
+    this.gistsList = document.createElement('ul')
+
+    this.app.append(this.gistForm, this.keyPrompt)
   }
 
   getElement(selector) {
@@ -99,27 +111,22 @@ class View {
   }
 
   displayGistsList() {
-    this.app.append(this.form, this.gistsList)
-  }
-
-  resetForm() {
-    this.inputDesc.value = ''
-    this.inputFilename.value = ''
+    this.app.append(this.gistFormToggle, this.gistsList)
   }
 
   displayGists(gists) {
     // TODO: render 'no gists' msg
-    if (!gists) return console.log('no gists')
+    if (!gists) return alert('no gists')
 
     // clear child nodes
     while (this.gistsList.firstChild) {
       this.gistsList.removeChild(this.gistsList.firstChild)
     }
 
-    // TODO: handle multiple files
     gists.forEach(gist => {
       const li = document.createElement('li')
       li.textContent = Object.keys(gist.files)[0]
+      li.classList.add('gist-list__item')
       li.setAttribute('id', `gist-${gist.id}`)
 
       const inputLabel = document.createElement('label')
@@ -132,9 +139,19 @@ class View {
       fileInput.dataset.id = gist.id
 
       inputLabel.append(fileInput)
-      li.append(inputLabel)
+      li.prepend(inputLabel)
       this.gistsList.append(li)
     })
+  }
+
+  renderGistForm() {
+    this.gistForm.hidden = false
+  }
+
+  hideGistForm() {
+    this.gistForm.hidden = true
+    this.inputDesc.value = ''
+    this.inputFilename.value = ''
   }
 
   renderSuccess(id) {
@@ -146,9 +163,15 @@ class View {
   }
 
   setUpEventListeners(controller) {
-    this.form.addEventListener('submit', controller.handleNewGist)
     this.keyPrompt.addEventListener('submit', e => {
       controller.handleInitOctokit(this.keyPromptInput.value)
+    })
+    this.gistFormToggle.addEventListener('click', () =>
+      this.renderGistForm(),
+    )
+    this.gistForm.addEventListener('submit', e => {
+      e.preventDefault()
+      controller.handleNewGist()
     })
     this.gistsList.addEventListener('change', function(e) {
       if (e.target.tagName === 'INPUT') {
@@ -194,25 +217,24 @@ class Controller {
     this.model.initOctokit(key)
   }
 
-  handleNewGist = event => {
-    event.preventDefault()
+  handleNewGist = () => {
     const {inputDesc, inputFilename} = this.view
 
     if (
       inputDesc.value.trim().length &&
       inputFilename.value.trim().length
     ) {
-      this.model.createGist({
-        description: inputDesc.value,
-        public: true,
-        files: {
-          [inputFilename.value]: {
-            content: 'Hello world!',
+      this.model
+        .createGist({
+          description: inputDesc.value,
+          public: true,
+          files: {
+            [inputFilename.value]: {
+              content: 'Hello world!',
+            },
           },
-        },
-      })
-
-      this.view.resetForm()
+        })
+        .then(() => this.view.hideGistForm())
     }
   }
 

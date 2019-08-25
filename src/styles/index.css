@@ -85,3 +85,14 @@ input:focus {
   padding: 0 0.5rem;
   cursor: pointer;
 }
+
+/* new gist form */
+.gist-form {
+  margin-bottom: 2rem;
+}
+
+.gist-form__toggle {
+  position: absolute;
+  top: 3.5rem;
+  right: 1rem;
+}
