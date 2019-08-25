@@ -124,7 +124,7 @@ class View {
 
       const inputLabel = document.createElement('label')
       inputLabel.classList.add('file-input__label')
-      inputLabel.textContent = '🔎'
+      inputLabel.textContent = '🔄'
       inputLabel.setAttribute('id', `${gist.id}-file-input`)
       const fileInput = document.createElement('input')
       fileInput.classList.add('file-input', 'sr-only')
@@ -137,34 +137,12 @@ class View {
     })
   }
 
-  renderSyncActions(id, filename, content, cb) {
-    const gist = document.getElementById(`gist-${id}`)
-    const fileInput = document.getElementById(`${id}-file-input`)
-
-    // content has changed
-    if (content) {
-      const btnRender = document.createElement('button')
-      btnRender.classList.add('btn', 'btn--reset')
-      btnRender.textContent = '🔄'
-      btnRender.setAttribute('id', `${id}-render-btn`)
-      btnRender.onclick = () => {
-        cb(id, filename, content)
-      }
-
-      fileInput.remove()
-
-      gist.append(btnRender)
-    } else {
-      alert(`No changes to ${filename}!`)
-    }
-  }
-
   renderSuccess(id) {
-    const btnRender = document.getElementById(`${id}-render-btn`)
-    btnRender.textContent = '✅'
-    btnRender.onclick = null
-    btnRender.setAttribute('disabled', true)
-    btnRender.classList.add('btn--disabled')
+    const fileInput = document.getElementById(`${id}-file-input`)
+    fileInput.textContent = '✅'
+    fileInput.onclick = null
+    fileInput.setAttribute('disabled', true)
+    fileInput.classList.add('btn--disabled')
   }
 
   setUpEventListeners(controller) {
@@ -241,13 +219,8 @@ class Controller {
   handleSelectGist = ({id, filename, content}) =>
     this.model.fetchGist(id).then(({data}) => {
       if (data.files[filename]) {
-        this.view.renderSyncActions(
-          id,
-          filename,
-          content.trim() !== data.files[filename].content.trim() &&
-            content,
-          this.handleSaveGist,
-        )
+        const gist = document.getElementById(`gist-${id}`)
+        this.handleSaveGist(id, filename, content)
       } else alert('Ensure filenames match')
     })
 
