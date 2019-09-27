@@ -125,7 +125,10 @@ class View {
 
     gists.forEach(gist => {
       const li = document.createElement('li')
-      li.textContent = Object.keys(gist.files)[0]
+      const files = Object.keys(gist.files)
+      const fileName = files[0]
+      const fileNames = files.join(', ')
+
       li.classList.add('gist-list__item')
       li.setAttribute('id', `gist-${gist.id}`)
 
@@ -137,6 +140,18 @@ class View {
       fileInput.classList.add('file-input', 'sr-only')
       fileInput.type = 'file'
       fileInput.dataset.id = gist.id
+
+      if (files.length > 1) {
+        const tooltip = document.createElement('a')
+        tooltip.setAttribute('href', '#')
+        tooltip.classList.add('tooltip--bottom')
+        tooltip.innerText = fileName
+        tooltip.dataset.tooltip =
+          files.length > 1 ? `[${fileNames}]` : ''
+        li.append(tooltip)
+      } else {
+        li.innerText = fileName
+      }
 
       inputLabel.append(fileInput)
       li.prepend(inputLabel)
