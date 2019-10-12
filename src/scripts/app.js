@@ -8,7 +8,7 @@ class Model {
 
   initOctokit(key) {
     this.octokit = Octokit({
-      auth: key,
+      auth: key
     })
 
     this.onOctokitInit()
@@ -23,25 +23,23 @@ class Model {
     this.octokit.gists
       .list({
         headers: {
-          'If-None-Match': '', // avoid cache
-        },
+          'If-None-Match': '' // avoid cache
+        }
       })
-      .then(({data}) => this.onGistsListChange(data))
+      .then(({ data }) => this.onGistsListChange(data))
   }
 
   fetchGist(id) {
     return this.octokit.gists.get({
       gist_id: id,
       headers: {
-        'If-None-Match': '', // avoid cache
-      },
+        'If-None-Match': '' // avoid cache
+      }
     })
   }
 
   createGist(payload) {
-    return this.octokit.gists
-      .create(payload)
-      .then(() => this.fetchGists())
+    return this.octokit.gists.create(payload).then(() => this.fetchGists())
   }
 
   saveGist(payload) {
@@ -67,11 +65,7 @@ class View {
 
     this.gistFormToggle = document.createElement('button')
     this.gistFormToggle.textContent = '➕'
-    this.gistFormToggle.classList.add(
-      'btn',
-      'btn--reset',
-      'gist-form__toggle',
-    )
+    this.gistFormToggle.classList.add('btn', 'btn--reset', 'gist-form__toggle')
 
     this.gistForm = document.createElement('form')
     this.gistForm.classList.add('gist-form')
@@ -146,8 +140,7 @@ class View {
         tooltip.setAttribute('href', '#')
         tooltip.classList.add('tooltip--bottom')
         tooltip.innerText = fileName
-        tooltip.dataset.tooltip =
-          files.length > 1 ? `[${fileNames}]` : ''
+        tooltip.dataset.tooltip = files.length > 1 ? `[${fileNames}]` : ''
         li.append(tooltip)
       } else {
         li.innerText = fileName
@@ -181,9 +174,7 @@ class View {
     this.keyPrompt.addEventListener('submit', e => {
       controller.handleInitOctokit(this.keyPromptInput.value)
     })
-    this.gistFormToggle.addEventListener('click', () =>
-      this.renderGistForm(),
-    )
+    this.gistFormToggle.addEventListener('click', () => this.renderGistForm())
     this.gistForm.addEventListener('submit', e => {
       e.preventDefault()
       controller.handleNewGist()
@@ -194,14 +185,12 @@ class View {
 
         fs.readFile(gist.path, 'utf-8', (err, data) => {
           if (err)
-            return alert(
-              `An error ocurred reading the file at ${gist.path}`,
-            )
+            return alert(`An error ocurred reading the file at ${gist.path}`)
 
           controller.handleSelectGist({
             id: e.target.dataset.id,
             filename: gist.name,
-            content: data,
+            content: data
           })
         })
       }
@@ -233,28 +222,25 @@ class Controller {
   }
 
   handleNewGist = () => {
-    const {inputDesc, inputFilename} = this.view
+    const { inputDesc, inputFilename } = this.view
 
-    if (
-      inputDesc.value.trim().length &&
-      inputFilename.value.trim().length
-    ) {
+    if (inputDesc.value.trim().length && inputFilename.value.trim().length) {
       this.model
         .createGist({
           description: inputDesc.value,
           public: true,
           files: {
             [inputFilename.value]: {
-              content: 'Hello world!',
-            },
-          },
+              content: 'Hello world!'
+            }
+          }
         })
         .then(() => this.view.hideGistForm())
     }
   }
 
-  handleSelectGist = ({id, filename, content}) =>
-    this.model.fetchGist(id).then(({data}) => {
+  handleSelectGist = ({ id, filename, content }) =>
+    this.model.fetchGist(id).then(({ data }) => {
       if (data.files[filename]) {
         const gist = document.getElementById(`gist-${id}`)
         this.handleSaveGist(id, filename, content)
@@ -262,16 +248,28 @@ class Controller {
     })
 
   handleSaveGist = (id, filename, content) => {
+    ;[...document.getElementsByClassName('file-input__label')].forEach(
+      label => {
+        label.classList.add('file-input__label__clicked')
+      }
+    )
     this.model
       .saveGist({
         gist_id: id,
         files: {
           [filename]: {
-            content,
-          },
-        },
+            content
+          }
+        }
       })
       .then(() => this.view.renderSuccess(id))
+      .then(() =>
+        [...document.getElementsByClassName('file-input__label')].forEach(
+          label => {
+            label.classList.remove('file-input__label__clicked')
+          }
+        )
+      )
   }
 }
 
